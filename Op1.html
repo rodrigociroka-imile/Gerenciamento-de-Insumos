@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Entrada de Produto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: linear-gradient(135deg, #0d6efd, #0a58ca); }
+        .card { border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .preview-img { max-width: 280px; max-height: 280px; object-fit: cover; border-radius: 12px; }
+        .form-label { font-weight: 600; }
+        .modal-content { border-radius: 15px; }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR (só aparece após login) -->
+    <nav id="navbar" class="navbar navbar-dark d-none">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1 fw-bold"><i class="fas fa-boxes"></i> Sistema de Controle de Estoque</span>
+            <div>
+                <span class="text-white me-3">Bem-vindo, <strong id="userName">Gabriel</strong></span>
+                <button onclick="logout()" class="btn btn-outline-light btn-sm"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- TELA DE LOGIN -->
+    <div id="loginScreen" class="container d-flex align-items-center justify-content-center min-vh-100">
+        <div class="card shadow-lg" style="width: 100%; max-width: 420px;">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-boxes fa-4x text-primary mb-3"></i>
+                    <h2 class="fw-bold">Entrada de Produto</h2>
+                    <p class="text-muted">Sistema Profissional de Controle de Estoque</p>
+                </div>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label">Login</label>
+                        <input type="text" id="loginInput" class="form-control form-control-lg" placeholder="Informe o Login" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Senha</label>
+                        <input type="password" id="senhaInput" class="form-control form-control-lg" placeholder="Informe a senha" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Entrar no Sistema</button>
+                </form>
+                <div class="text-center mt-3 text-muted small">
+                    <strong>Usuário padrão Test:</strong> admin<br>
+                    <strong>Senha padrão Test:</strong> 123
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA PRINCIPAL (após login) -->
+    <div id="mainScreen" class="d-none container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h3 class="mb-0"><i class="fas fa-arrow-down"></i> REGISTRO DE ENTRADA DE PRODUTO</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="formEntrada">
+                            <div class="row g-4">
+
+                                <!-- Código do Produto -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Código do Produto</label>
+                                    <input type="text" id="codigo" class="form-control" placeholder="Ex: PROD-45678" required>
+                                </div>
+
+                                <!-- Nome do Produto -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Nome do Produto</label>
+                                    <input type="text" id="nome" class="form-control" placeholder="Ex: Smartphone Samsung" required>
+                                </div>
+
+                                <!-- Nome da Empresa -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Nome da Empresa</label>
+                                    <input type="text" id="empresa" class="form-control" placeholder="Ex: Tech Distribuidora" required>
+                                </div>
+
+                                <!-- Quantidade -->
+                                <div class="col-md-3">
+                                    <label class="form-label">Quantidade</label>
+                                    <input type="number" id="qt" class="form-control" min="1" value="1" required>
+                                </div>
+
+                                <!-- Data Chegada -->
+                                <div class="col-md-3">
+                                    <label class="form-label">Data Chegada</label>
+                                    <input type="date" id="dataChegada" class="form-control" required>
+                                </div>
+
+                                <!-- PO -->
+                                <div class="col-md-4">
+                                    <label class="form-label">PO</label>
+                                    <input type="text" id="po" class="form-control" placeholder="Ex: PO-2026-784">
+                                </div>
+
+                                <!-- RI -->
+                                <div class="col-md-4">
+                                    <label class="form-label">RI</label>
+                                    <input type="text" id="ri" class="form-control" placeholder="Ex: RI-02541">
+                                </div>
+
+                                <!-- PY -->
+                                <div class="col-md-4">
+                                    <label class="form-label">PY</label>
+                                    <input type="text" id="py" class="form-control" placeholder="Ex: PY-987">
+                                </div>
+
+                                <!-- NF -->
+                                <div class="col-md-4">
+                                    <label class="form-label">Número da Nota</label>
+                                    <input type="text" id="nf" class="form-control" placeholder="Ex: NF-98753">
+                                </div>
+
+                                <!-- Imagem / Foto -->
+                                <div class="col-12">
+                                    <label class="form-label">Imagem do Produto (Tira foto ou salve imagem)</label>
+                                    <div class="input-group">
+                                        <input type="file" id="fileInput" accept="image/*" class="form-control">
+                                        <button type="button" onclick="openCamera()" class="btn btn-outline-success">
+                                            <i class="fas fa-camera"></i> Tirar Foto
+                                        </button>
+                                    </div>
+                                    <div class="mt-3 text-center">
+                                        <img id="preview" class="preview-img border shadow-sm" 
+                                             src="https://via.placeholder.com/280x280/eeeeee/999999?text=Pré-visualização" alt="Preview">
+                                    </div>
+                                </div>
+
+                                <!-- Botão Registrar -->
+                                <div class="col-12 text-center mt-4">
+                                    <button type="submit" class="btn btn-success btn-lg px-5">
+                                        <i class="fas fa-save"></i> Registrar Entrada e Gerar QR Code
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CÂMERA -->
+    <div class="modal fade" id="cameraModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tirar Foto com Câmera</h5>
+                    <button type="button" class="btn-close" onclick="closeCameraModal()"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <video id="video" autoplay playsinline style="width:100%; max-height:420px; background:#000;"></video>
+                    <canvas id="canvas" class="d-none"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeCameraModal()">Cancelar</button>
+                    <button type="button" onclick="capturarFoto()" class="btn btn-primary">Capturar Foto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL QR CODE -->
+    <div class="modal fade" id="qrModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">QR Code Gerado Automaticamente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="qrContainer" style="margin: 0 auto;"></div>
+                    <p class="mt-3 text-muted small">Escaneie para identificar o produto</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentImage = '';
+        let currentStream = null;
+
+        // ====================== LOGIN ======================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const login = document.getElementById('loginInput').value.trim();
+            const senha = document.getElementById('senhaInput').value.trim();
+            if (login === 'admin' && senha === '123') {
+                localStorage.setItem('loggedIn', 'true');
+                localStorage.setItem('user', 'admin');
+                document.getElementById('loginScreen').classList.add('d-none');
+                document.getElementById('mainScreen').classList.remove('d-none');
+                document.getElementById('navbar').classList.remove('d-none');
+                document.getElementById('userName').textContent = 'Admin';
+            } else {
+                alert('Login ou senha incorretos!\n\nPadrão: admin / 123');
+            }
+        });
+
+        // ====================== LOGOUT ======================
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            location.reload();
+        }
+
+        // ====================== CARREGAR AO ABRIR ======================
+        window.onload = function() {
+            if (localStorage.getItem('loggedIn') === 'true') {
+                document.getElementById('loginScreen').classList.add('d-none');
+                document.getElementById('mainScreen').classList.remove('d-none');
+                document.getElementById('navbar').classList.remove('d-none');
+                document.getElementById('userName').textContent = localStorage.getItem('user') || 'Admin';
+            }
+        };
+
+        // ====================== IMAGEM - ARQUIVO ======================
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                currentImage = ev.target.result;
+                document.getElementById('preview').src = currentImage;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ====================== CÂMERA ======================
+        function openCamera() {
+            const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
+            modal.show();
+            const video = document.getElementById('video');
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => {
+                    currentStream = stream;
+                    video.srcObject = stream;
+                    video.play();
+                })
+                .catch(err => {
+                    alert('Erro ao acessar câmera: ' + err.message);
+                    modal.hide();
+                });
+        }
+
+        function closeCameraModal() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('cameraModal')).hide();
+        }
+
+        function capturarFoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            canvas.width = video.videoWidth || 1280;
+            canvas.height = video.videoHeight || 720;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            currentImage = canvas.toDataURL('image/png');
+            document.getElementById('preview').src = currentImage;
+            closeCameraModal();
+        }
+
+        // ====================== REGISTRAR ENTRADA ======================
+        document.getElementById('formEntrada').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Captura todos os campos
+            const codigo     = document.getElementById('codigo').value.trim();
+            const nome       = document.getElementById('nome').value.trim();
+            const empresa    = document.getElementById('empresa').value.trim();
+            const qt         = document.getElementById('qt').value.trim();
+            const dataChegada = document.getElementById('dataChegada').value;
+            const po         = document.getElementById('po').value.trim();
+            const ri         = document.getElementById('ri').value.trim();
+            const py         = document.getElementById('py').value.trim();
+            const nf         = document.getElementById('nf').value.trim();
+
+            if (!codigo || !nome || !empresa || !qt || !dataChegada || !nf || !currentImage) {
+                alert('Preencha todos os campos obrigatórios e adicione uma imagem!');
+                return;
+            }
+
+            const id = Date.now().toString(36).toUpperCase();
+            const dataHoraRegistro = new Date().toLocaleString('pt-BR');
+
+            // Monta string para QR Code (mais completa)
+            const qrData = [
+                `ENTRADA|ID:${id}`,
+                `COD:${codigo}`,
+                `PRODUTO:${nome}`,
+                `EMPRESA:${empresa}`,
+                `QT:${qt}`,
+                `DATA_CHEGADA:${dataChegada}`,
+                `PO:${po || 'N/A'}`,
+                `RI:${ri || 'N/A'}`,
+                `PY:${py || 'N/A'}`,
+                `NF:${py || 'N/A'}`,
+                `REGISTRO:${dataHoraRegistro}`
+            ].join('|');
+
+            const entrada = {
+                id: id,
+                codigo: codigo,
+                nome: nome,
+                empresa: empresa,
+                quantidade: parseInt(qt),
+                dataChegada: dataChegada,
+                po: po,
+                ri: ri,
+                py: py,
+                nf: nf,
+                imagem: currentImage,
+                dataHora: dataHoraRegistro,
+                qrData: qrData
+            };
+
+            let entradas = JSON.parse(localStorage.getItem('entradas') || '[]');
+            entradas.push(entrada);
+            localStorage.setItem('entradas', JSON.stringify(entradas));
+
+            alert('✅ Entrada registrada com sucesso!\nQR Code gerado automaticamente.');
+
+            // Mostra QR Code
+            const qrContainer = document.getElementById('qrContainer');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: qrData,
+                width: 280,
+                height: 280,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+            qrModal.show();
+
+            // Limpa formulário
+            document.getElementById('formEntrada').reset();
+            document.getElementById('preview').src = 'https://via.placeholder.com/280x280/eeeeee/999999?text=Pré-visualização';
+            currentImage = '';
+        });
+    </script>
+</body>
+</html>
