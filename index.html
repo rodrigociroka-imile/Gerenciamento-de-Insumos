@@ -12,22 +12,27 @@
                 var firstSheetName = workbook.SheetNames[0];
                 var worksheet = workbook.Sheets[firstSheetName];
 
-                // Convert sheet to JSON to filter blank rows
+                
+                // Converter planilha para JSON para filtrar linhas em branco
                 var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                
+                // Filtrar linhas em branco (linhas onde todas as células estão vazias, nulas ou indefinidas)
                 var filteredData = jsonData.filter(row => row.some(filledCell));
 
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                
+                // Heurística para encontrar a linha de cabeçalho ignorando as linhas com menos células preenchidas do que a linha seguinte
                 var headerRowIndex = filteredData.findIndex((row, index) =>
                   row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
                 );
-                // Fallback
+                
+                // Cair pra trás
                 if (headerRowIndex === -1 || headerRowIndex > 25) {
                   headerRowIndex = 0;
                 }
 
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+               
+                // Converter JSON filtrado de volta para CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Criar uma nova planilha a partir de uma matriz filtrada de matrizess
                 csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
                 return csv;
             } catch (e) {
@@ -48,7 +53,7 @@
 <body class="bg-gray-100 flex flex-col min-h-screen">
     <main class="flex-grow flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-lg shadow-lg text-center w-full max-w-md">
-            <div class="flex justify-center mb-6">
+            <div class="flex justify-center mb-6">   
                 <img src="https://www.imile.com/images/logos/Christmas_logo_Blue.svg" alt="Logo" class="rounded-full w-24 h-24">
             </div>
             <h1 class="text-2xl font-bold mb-6 sm:text-3xl">Gerenciamento de Insumos</h1>
