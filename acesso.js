@@ -2,11 +2,11 @@
 
 (function () {
   const USUARIOS_VALIDOS = {
-    "admin":       { senha: "123456",       nome: "Administrador",     paginas: ["index.html", "asset.html"] },
-    "inbound":     { senha: "inbound123",   nome: "Recebimento",       paginas: ["inbound_outbound.html"] },
-    "expedicao":   { senha: "exp123",       nome: "Expedição",         paginas: ["expedicao.html"] },
-    "inventario":  { senha: "inv123",       nome: "Controle Estoque",  paginas: ["inventario.html"] },
-    "visualizacao":{ senha: "vis123",       nome: "Visualização",      paginas: ["visualizacao.html"] },
+    "admin":       { senha: "123456",       nome: "ERICLM",     paginas: ["index.html", "asset.html"] },
+    "inbound":     { senha: "inbound123",   nome: "Gabriel",       paginas: ["inbound_outbound.html"] },
+    "expedicao":   { senha: "exp123",       nome: "Rodrigro",         paginas: ["expedicao.html"] },
+    "inventario":  { senha: "inv123",       nome: "ERICLM",  paginas: ["inventario.html"] },
+    "visualizacao":{ senha: "vis123",       nome: "ERICLM",      paginas: ["visualizacao.html"] },
   };
 
   function isLoggedIn() {
