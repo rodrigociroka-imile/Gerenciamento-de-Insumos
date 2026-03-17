@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SCI - Sistema de Controle de Insumo - Entradas e Saídas</title>
+    <title>SCI – Inbound / Outbound</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -12,11 +12,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
       body {
-        background-color: #f8f9fa;
+        background-color: #f2f6ff;
         font-family: "Segoe UI", sans-serif;
       }
       .navbar {
@@ -24,7 +24,7 @@
       }
       .card {
         border: none;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
       }
       .preview-img {
         max-width: 280px;
@@ -32,33 +32,26 @@
         object-fit: cover;
         border-radius: 12px;
       }
-      .form-label {
-        font-weight: 600;
+      .table-fixed {
+        max-height: 360px;
+        overflow: auto;
       }
-      .tab-content {
-        background: white;
-        border: 1px solid #dee2e6;
-        border-top: none;
-        border-radius: 0 0 8px 8px;
-      }
-      .nav-tabs .nav-link.active {
-        background: white;
-        border-bottom-color: white;
-        font-weight: 600;
+      .modal-title {
+        font-weight: 700;
       }
     </style>
   </head>
   <body>
-    <!-- NAVBAR (aparece após login) -->
+    <!-- NAVBAR -->
     <nav id="mainNavbar" class="navbar navbar-dark d-none">
       <div class="container-fluid">
         <span class="navbar-brand mb-0 h1 fw-bold"
-          ><i class="fas fa-boxes-stacked"></i> Inbound / Outbound - Controle de Estoque</span>
-        <div>
-          <span class="text-white me-3">
+          ><i class="fas fa-boxes-stacked"></i> Inbound / Outbound</span
+        >
+        <div class="d-flex align-items-center gap-3">
+          <span class="text-white fw-semibold">
             Bem-vindo, <strong id="userName">Usuário</strong>
           </span>
-
           <button onclick="logout()" class="btn btn-outline-light btn-sm">
             <i class="fas fa-sign-out-alt"></i> Sair
           </button>
@@ -66,7 +59,7 @@
       </div>
     </nav>
 
-    <!-- TELA DE LOGIN -->
+    <!-- LOGIN -->
     <div
       id="loginScreen"
       class="container d-flex align-items-center justify-content-center min-vh-100"
@@ -74,9 +67,9 @@
       <div class="card shadow-lg" style="width: 100%; max-width: 420px">
         <div class="card-body p-5">
           <div class="text-center mb-4">
-            <i class="fas fa-boxes-stacked fa-4x text-primary mb-3"></i>
-            <h2 class="fw-bold">Inbound / Outbound</h2>
-            <p class="text-muted">Controle de Entrada e Saída de Produtos</p>
+            <i class="fa-solid fa-boxes-stacked fa-4x text-primary mb-3"></i>
+            <h2 class="fw-bold">Controle de Entrada / Saída</h2>
+            <p class="text-muted">Acesse para registrar e visualizar movimentações</p>
           </div>
           <form id="loginForm">
             <div class="mb-3">
@@ -100,399 +93,346 @@
               />
             </div>
             <button type="submit" class="btn btn-primary btn-lg w-100">
-              Entrar
+              Entrar no Sistema
             </button>
           </form>
           <div class="text-center mt-4 text-muted small">
-            <strong>Teste:</strong> login <code>admin</code> • senha
-            <code>123</code>
+            <strong>Teste:</strong> login <code>inbound</code> • senha
+            <code>inbound123</code>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL (após login) -->
+    <!-- CONTEÚDO PRINCIPAL -->
     <div id="mainContent" class="d-none container py-4">
-      <ul class="nav nav-tabs mb-0" id="myTab" role="tablist">
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3 mb-4">
+        <div>
+          <h2 class="fw-bold text-primary mb-1">Inbound / Outbound</h2>
+          <p class="text-muted mb-0">Registre entradas/saídas e visualize rapidamente.</p>
+        </div>
+        <button id="btnRefresh" class="btn btn-outline-primary">
+          <i class="fas fa-sync-alt me-2"></i> Atualizar dados
+        </button>
+      </div>
+
+      <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
           <button
             class="nav-link active"
-            id="inbound-tab"
+            id="tabInbound"
             data-bs-toggle="tab"
             data-bs-target="#inbound"
             type="button"
             role="tab"
+            aria-controls="inbound"
+            aria-selected="true"
           >
-            <i class="fas fa-arrow-down me-1"></i> Inbound (Entrada)
+            Entrada
           </button>
         </li>
         <li class="nav-item" role="presentation">
           <button
             class="nav-link"
-            id="outbound-tab"
+            id="tabOutbound"
             data-bs-toggle="tab"
             data-bs-target="#outbound"
             type="button"
             role="tab"
+            aria-controls="outbound"
+            aria-selected="false"
           >
-            <i class="fas fa-arrow-up me-1"></i> Outbound (Saída)
+            Saída
           </button>
         </li>
       </ul>
 
-      <div class="tab-content p-4" id="myTabContent">
-        <!-- ABA INBOUND -->
+      <div class="tab-content">
+        <!-- INBOUND -->
         <div class="tab-pane fade show active" id="inbound" role="tabpanel">
-          <div class="card border-0 shadow-sm">
-            <div class="card-header bg-primary text-white text-center py-3">
-              <h4 class="mb-0">
-                <i class="fas fa-arrow-down"></i> REGISTRO DE ENTRADA DE PRODUTO
-              </h4>
-            </div>
-            <div class="card-body">
-              <form id="formEntrada">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label">Código do Produto</label>
-                    <input
-                      type="text"
-                      id="codigo"
-                      class="form-control"
-                      placeholder="Ex: PROD-45678"
-                      required
-                    />
-                  </div>
+          <div class="row g-3">
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header bg-primary text-white">
+                  <strong>Cadastrar Entrada</strong>
+                </div>
+                <div class="card-body">
+                  <form id="formEntrada">
+                    <div class="mb-3">
+                      <label class="form-label">Código</label>
+                      <input id="codigo" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Produto</label>
+                      <input id="nome" class="form-control" required />
+                    </div>
+                    <div class="mb-3 row g-2">
+                      <div class="col-6">
+                        <label class="form-label">Empresa</label>
+                        <input id="empresa" class="form-control" required />
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">Quantidade</label>
+                        <input id="qt" type="number" min="1" class="form-control" required />
+                      </div>
+                    </div>
+                    <div class="mb-3 row g-2">
+                      <div class="col-6">
+                        <label class="form-label">Data Chegada</label>
+                        <input id="dataChegada" type="date" class="form-control" required />
+                      </div>
+                      <div class="col-6">
+                        <label class="form-label">PO / RI / PY</label>
+                        <div class="d-flex gap-2">
+                          <input id="po" placeholder="PO" class="form-control" />
+                          <input id="ri" placeholder="RI" class="form-control" />
+                          <input id="py" placeholder="PY" class="form-control" />
+                        </div>
+                      </div>
+                    </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">Nome do Produto</label>
-                    <input
-                      type="text"
-                      id="nome"
-                      class="form-control"
-                      placeholder="Ex: Monitor LG 27''"
-                      required
-                    />
-                  </div>
+                    <div class="mb-3">
+                      <label class="form-label">Foto</label>
+                      <input type="file" id="fileInput" accept="image/*" class="form-control" />
+                      <img id="preview" class="preview-img mt-3 border" src="https://via.placeholder.com/280x280?text=Sem+Imagem" alt="Preview" />
+                    </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label"
-                      >Nome da Empresa / Fornecedor</label
-                    >
-                    <input
-                      type="text"
-                      id="empresa"
-                      class="form-control"
-                      placeholder="Ex: Ingram Micro"
-                      required
-                    />
-                  </div>
-
-                  <div class="col-md-3">
-                    <label class="form-label">Quantidade</label>
-                    <input
-                      type="number"
-                      id="qt"
-                      class="form-control"
-                      min="1"
-                      value="1"
-                      required
-                    />
-                  </div>
-
-                  <div class="col-md-3">
-                    <label class="form-label">Data de Chegada</label>
-                    <input
-                      type="date"
-                      id="dataChegada"
-                      class="form-control"
-                      required
-                    />
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">PO</label>
-                    <input
-                      type="text"
-                      id="po"
-                      class="form-control"
-                      placeholder="Ex: PO-2026-1234"
-                    />
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">RI</label>
-                    <input
-                      type="text"
-                      id="ri"
-                      class="form-control"
-                      placeholder="Ex: RI-000987"
-                    />
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">PY</label>
-                    <input
-                      type="text"
-                      id="py"
-                      class="form-control"
-                      placeholder="Ex: PY-456"
-                    />
-                  </div>
-
-                  <div class="col-12">
-                    <label class="form-label">Imagem do Produto</label>
-                    <div class="input-group mb-2">
-                      <input
-                        type="file"
-                        id="fileInput"
-                        accept="image/*"
-                        class="form-control"
-                      />
-                      <button
-                        type="button"
-                        onclick="openCamera()"
-                        class="btn btn-outline-success"
-                      >
-                        <i class="fas fa-camera"></i> Tirar Foto
+                    <div class="d-flex justify-content-between align-items-center">
+                      <button type="button" onclick="openCamera()" class="btn btn-outline-primary">
+                        <i class="fas fa-camera me-1"></i> Usar câmera
+                      </button>
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Salvar Entrada
                       </button>
                     </div>
-                    <div class="text-center">
-                      <img
-                        id="preview"
-                        class="preview-img border shadow"
-                        src="https://fontawesome.com/icons/boxes-stacked?f=classic&s=solid"
-                        alt="Preview"
-                      />
-                    </div>
-                  </div>
+                  </form>
+                </div>
+              </div>
+            </div>
 
-                  <div class="col-12 text-center mt-4">
-                    <button type="submit" class="btn btn-success btn-lg px-5">
-                      <i class="fas fa-save"></i> Registrar Entrada e Gerar QR
-                      Code
-                    </button>
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header bg-secondary text-white">
+                  <strong>Últimas Entradas</strong>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-fixed">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Produto</th>
+                          <th>Qt</th>
+                          <th>Data</th>
+                          <th>Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody id="listaEntradas"></tbody>
+                    </table>
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- ABA OUTBOUND -->
+        <!-- OUTBOUND -->
         <div class="tab-pane fade" id="outbound" role="tabpanel">
-          <div class="card border-0 shadow-sm">
-            <div class="card-header bg-danger text-white text-center py-3">
-              <h4 class="mb-0">
-                <i class="fas fa-arrow-up"></i> REGISTRO DE SAÍDA DE PRODUTO
-              </h4>
-            </div>
-            <div class="card-body">
-              <form id="formSaida">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <label class="form-label">Código do Produto</label>
-                    <input
-                      type="text"
-                      id="saida-codigo"
-                      class="form-control"
-                      placeholder="Ex: PROD-45678"
-                      required
-                    />
-                  </div>
+          <div class="row g-3">
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header bg-primary text-white">
+                  <strong>Cadastrar Saída</strong>
+                </div>
+                <div class="card-body">
+                  <form id="formSaida">
+                    <div class="mb-3">
+                      <label class="form-label">Código</label>
+                      <input id="saida-codigo" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Quantidade</label>
+                      <input id="saida-qt" type="number" min="1" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Região</label>
+                      <input id="region" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Estação</label>
+                      <input id="station" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Observação</label>
+                      <textarea id="observacao" class="form-control" rows="2"></textarea>
+                    </div>
 
-                  <div class="col-md-6">
-                    <label class="form-label">Quantidade a retirar</label>
-                    <input
-                      type="number"
-                      id="saida-qt"
-                      class="form-control"
-                      min="1"
-                      required
-                    />
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">Region / Região</label>
-                    <input
-                      type="text"
-                      id="region"
-                      class="form-control"
-                      placeholder="Ex: SUL"
-                      required
-                    />
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">Station / Estação</label>
-                    <input
-                      type="text"
-                      id="station"
-                      class="form-control"
-                      placeholder="Ex: ST-03"
-                      required
-                    />
-                  </div>
-
-                  <div class="col-md-12">
-                    <label class="form-label">Observação / Destino</label>
-                    <textarea
-                      id="observacao"
-                      class="form-control"
-                      rows="2"
-                      placeholder="Ex: Envio para cliente XYZ - OS 14587"
-                    ></textarea>
-                  </div>
-
-                  <div class="col-12 text-center mt-4">
-                    <button type="submit" class="btn btn-danger btn-lg px-5">
-                      <i class="fas fa-truck-fast"></i> Registrar Saída
+                    <button type="submit" class="btn btn-primary w-100">
+                      <i class="fas fa-save me-1"></i> Salvar Saída
                     </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header bg-secondary text-white">
+                  <strong>Últimas Saídas</strong>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-fixed">
+                    <table class="table table-hover mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Produto</th>
+                          <th>Qt</th>
+                          <th>Local</th>
+                          <th>Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody id="listaSaidas"></tbody>
+                    </table>
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL CÂMERA -->
+    <!-- CAMERA MODAL -->
     <div class="modal fade" id="cameraModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Capturar Foto</h5>
-            <button
-              type="button"
-              class="btn-close"
-              onclick="closeCameraModal()"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body text-center">
-            <video
-              id="video"
-              autoplay
-              playsinline
-              style="width: 100%; max-height: 420px; background: #000"
-            ></video>
-            <canvas id="canvas" class="d-none"></canvas>
+            <video id="video" playsinline style="width:100%; max-height:360px;"></video>
           </div>
           <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              onclick="closeCameraModal()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onclick="capturarFoto()"
-              class="btn btn-primary"
-            >
-              Capturar
-            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="capturarFoto()">Capturar</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL QR CODE -->
-    <div class="modal fade" id="qrModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">QR Code Gerado</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body text-center">
-            <div id="qrContainer" style="margin: 0 auto"></div>
-            <p class="mt-3 text-muted">Escaneie para consultar o produto</p>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="acesso.js"></script>
+    <script type="module">
+      import { DB } from './bd.js';
 
-    <script>
-      let currentImage = "";
+      let currentImage = '';
       let currentStream = null;
 
-      // LOGIN
-      document.getElementById("loginForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const login = document.getElementById("loginInput").value.trim();
-        const senha = document.getElementById("senhaInput").value.trim();
-        if (login === "admin" && senha === "123") {
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("user", "Gabriel");
-          showMainInterface();
-        } else {
-          alert("Login ou senha incorretos!");
-        }
+      access.initAccess({
+        mainScreenId: 'mainContent',
+        navbarId: 'mainNavbar',
+        userNameId: 'userName',
+        userDisplayName: 'Gabriel',
+        validLogin: 'inbound',
+        validSenha: 'inbound123',
       });
 
-      function showMainInterface() {
-        document.getElementById("loginScreen").classList.add("d-none");
-        document.getElementById("mainContent").classList.remove("d-none");
-        document.getElementById("mainNavbar").classList.remove("d-none");
-        document.getElementById("userName").textContent =
-          localStorage.getItem("user") || "Usuário";
+      async function loadTables() {
+        await carregarEntradas();
+        await carregarSaidas();
       }
 
-      function logout() {
-        // Se estiver usando localStorage ou sessionStorage
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // Redireciona para index
-        window.location.href = "index.html";
+      async function carregarEntradas() {
+        const entradas = (await DB.getEntradas()).reverse();
+        const tbody = document.getElementById('listaEntradas');
+        tbody.innerHTML = '';
+        entradas.slice(0, 12).forEach((e) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${e.nome || '-'}</td>
+            <td>${e.quantidade || 0}</td>
+            <td>${e.dataHora || '-'}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-danger" onclick="deletarEntrada('${e.id}')">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
 
-      // Carregar se já logado
-      if (localStorage.getItem("loggedIn") === "true") {
-        showMainInterface();
+      async function carregarSaidas() {
+        const saidas = (await DB.getSaidas()).reverse();
+        const tbody = document.getElementById('listaSaidas');
+        tbody.innerHTML = '';
+        saidas.slice(0, 12).forEach((s) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${s.codigo || '-'}</td>
+            <td>${s.quantidade || 0}</td>
+            <td>${s.local || '-'}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-danger" onclick="deletarSaida('${s.id}')">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
       }
 
-      // ── ENTRADA ────────────────────────────────────────
-      document.getElementById("fileInput").addEventListener("change", (e) => {
+      async function deletarEntrada(id) {
+        if (!id) return;
+        if (!confirm('Excluir entrada?')) return;
+        await DB.deleteEntrada(id);
+        await loadTables();
+      }
+
+      async function deletarSaida(id) {
+        if (!id) return;
+        if (!confirm('Excluir saída?')) return;
+        await DB.deleteSaida(id);
+        await loadTables();
+      }
+
+      document.getElementById('btnRefresh').addEventListener('click', loadTables);
+
+      document.getElementById('fileInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (ev) => {
           currentImage = ev.target.result;
-          document.getElementById("preview").src = currentImage;
+          document.getElementById('preview').src = currentImage;
         };
         reader.readAsDataURL(file);
       });
 
       function openCamera() {
-        const modal = new bootstrap.Modal(
-          document.getElementById("cameraModal"),
-        );
+        const modal = new bootstrap.Modal(document.getElementById('cameraModal'));
         modal.show();
         navigator.mediaDevices
-          .getUserMedia({ video: { facingMode: "environment" } })
+          .getUserMedia({ video: { facingMode: 'environment' } })
           .then((stream) => {
             currentStream = stream;
-            document.getElementById("video").srcObject = stream;
+            document.getElementById('video').srcObject = stream;
           })
           .catch((err) => {
-            alert("Não foi possível acessar a câmera: " + err.message);
+            alert('Não foi possível acessar a câmera: ' + err.message);
             modal.hide();
           });
+      }
+
+      function capturarFoto() {
+        const video = document.getElementById('video');
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        currentImage = canvas.toDataURL('image/png');
+        document.getElementById('preview').src = currentImage;
+        closeCameraModal();
       }
 
       function closeCameraModal() {
@@ -500,109 +440,62 @@
           currentStream.getTracks().forEach((t) => t.stop());
           currentStream = null;
         }
-        bootstrap.Modal.getInstance(
-          document.getElementById("cameraModal"),
-        )?.hide();
+        bootstrap.Modal.getInstance(document.getElementById('cameraModal')).hide();
       }
 
-      function capturarFoto() {
-        const video = document.getElementById("video");
-        const canvas = document.getElementById("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0);
-        currentImage = canvas.toDataURL("image/png");
-        document.getElementById("preview").src = currentImage;
-        closeCameraModal();
-      }
-
-      document.getElementById("formEntrada").addEventListener("submit", (e) => {
+      document.getElementById('formEntrada').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const campos = {
-          codigo: document.getElementById("codigo").value.trim(),
-          nome: document.getElementById("nome").value.trim(),
-          empresa: document.getElementById("empresa").value.trim(),
-          qt: document.getElementById("qt").value,
-          dataChegada: document.getElementById("dataChegada").value,
-          po: document.getElementById("po").value.trim(),
-          ri: document.getElementById("ri").value.trim(),
-          py: document.getElementById("py").value.trim(),
-        };
-
-        if (Object.values(campos).some((v) => !v) || !currentImage) {
-          alert("Preencha todos os campos obrigatórios e inclua uma imagem.");
-          return;
-        }
-
-        const id = Date.now().toString(36).toUpperCase();
-        const dataHora = new Date().toLocaleString("pt-BR");
-
-        const qrData = `ENTRADA|ID:${id}|COD:${campos.codigo}|PROD:${campos.nome}|EMP:${campos.empresa}|QT:${campos.qt}|CHEGADA:${campos.dataChegada}|PO:${campos.po || "--"}|RI:${campos.ri || "--"}|PY:${campos.py || "--"}|REG:${dataHora}`;
-
         const entrada = {
-          ...campos,
-          id,
+          id: Date.now().toString(36).toUpperCase(),
+          codigo: document.getElementById('codigo').value.trim(),
+          nome: document.getElementById('nome').value.trim(),
+          empresa: document.getElementById('empresa').value.trim(),
+          quantidade: Number(document.getElementById('qt').value),
+          dataHora: new Date().toLocaleString('pt-BR'),
+          dataChegada: document.getElementById('dataChegada').value,
+          po: document.getElementById('po').value.trim(),
+          ri: document.getElementById('ri').value.trim(),
+          py: document.getElementById('py').value.trim(),
           imagem: currentImage,
-          dataHora,
-          qrData,
+          qrData: '',
         };
 
-        let entradas = JSON.parse(localStorage.getItem("entradas") || "[]");
-        entradas.push(entrada);
-        localStorage.setItem("entradas", JSON.stringify(entradas));
+        entrada.qrData = `ENTRADA|ID:${entrada.id}|COD:${entrada.codigo}|PROD:${entrada.nome}|EMP:${entrada.empresa}|QT:${entrada.quantidade}|CHEGADA:${entrada.dataChegada}|PO:${entrada.po || '--'}|RI:${entrada.ri || '--'}|PY:${entrada.py || '--'}|REG:${entrada.dataHora}`;
 
-        // Mostra QR
-        document.getElementById("qrContainer").innerHTML = "";
-        new QRCode(document.getElementById("qrContainer"), {
-          text: qrData,
-          width: 260,
-          height: 260,
-          correctLevel: QRCode.CorrectLevel.H,
-        });
-
-        new bootstrap.Modal(document.getElementById("qrModal")).show();
-
-        // Reset
+        await DB.addEntrada(entrada);
+        alert('Entrada registrada com sucesso.');
         e.target.reset();
-        document.getElementById("preview").src =
-          "https://fontawesome.com/icons/boxes-stacked?f=classic&s=solid";
-        currentImage = "";
-        alert("Entrada registrada com sucesso!");
+        document.getElementById('preview').src = 'https://via.placeholder.com/280x280?text=Sem+Imagem';
+        currentImage = '';
+        await loadTables();
       });
 
-      // ── SAÍDA ──────────────────────────────────────────
-      document.getElementById("formSaida").addEventListener("submit", (e) => {
+      document.getElementById('formSaida').addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const saida = {
           id: Date.now().toString(36).toUpperCase(),
-          codigo: document.getElementById("saida-codigo").value.trim(),
-          quantidade: parseInt(document.getElementById("saida-qt").value),
-          region: document.getElementById("region").value.trim(),
-          station: document.getElementById("station").value.trim(),
-          observacao: document.getElementById("observacao").value.trim(),
-          dataHora: new Date().toLocaleString("pt-BR"),
+          codigo: document.getElementById('saida-codigo').value.trim(),
+          quantidade: Number(document.getElementById('saida-qt').value),
+          region: document.getElementById('region').value.trim(),
+          station: document.getElementById('station').value.trim(),
+          observacao: document.getElementById('observacao').value.trim(),
+          dataHora: new Date().toLocaleString('pt-BR'),
         };
 
-        if (
-          !saida.codigo ||
-          !saida.quantidade ||
-          !saida.region ||
-          !saida.station
-        ) {
-          alert("Preencha os campos obrigatórios.");
+        if (!saida.codigo || !saida.quantidade || !saida.region || !saida.station) {
+          alert('Preencha todos os campos obrigatórios.');
           return;
         }
 
-        let saidas = JSON.parse(localStorage.getItem("saidas") || "[]");
-        saidas.push(saida);
-        localStorage.setItem("saidas", JSON.stringify(saidas));
-
-        alert(
-          `Saída registrada!\n\nCódigo: ${saida.codigo}\nQuantidade: ${saida.quantidade}\nDestino: ${saida.region} / ${saida.station}`,
-        );
-
+        await DB.addSaida(saida);
+        alert('Saída registrada com sucesso.');
         e.target.reset();
+        await loadTables();
+      });
+
+      window.addEventListener('load', async () => {
+        await loadTables();
       });
     </script>
   </body>
