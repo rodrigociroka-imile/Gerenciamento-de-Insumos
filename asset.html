@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SCI – Asset</title>
-
+    <link rel="shortcut icon" href="./img/CDC-ESTOQUE.png">
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -181,6 +181,9 @@
               <strong>Assets cadastrados</strong>
             </div>
             <div class="card-body p-0">
+              <div class="p-3">
+                <input id="assetSearch" class="form-control" placeholder="Buscar por nome..." />
+              </div>
               <div class="table-fixed">
                 <table class="table table-hover mb-0">
                   <thead class="table-light">
@@ -207,6 +210,13 @@
       import { DB } from './bd.js';
 
       let currentAssetImage = '';
+      let assetRecords = [];
+      let assetFilter = '';
+
+      document.getElementById('assetSearch').addEventListener('input', (e) => {
+        assetFilter = String(e.target.value || '').trim().toLowerCase();
+        renderAssetTable();
+      });
 
       document.getElementById('assetImagem').addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -243,23 +253,58 @@
 
         await DB.addItem('assets', asset);
         alert('Asset salvo com sucesso no banco de dados.');
+        document.getElementById('assetForm').reset();
+        document.getElementById('assetPreview').src =
+          'https://via.placeholder.com/240x240?text=Sem+Imagem';
+        currentAssetImage = '';
         carregarAssets();
       }
 
       async function carregarAssets() {
         const assets = (await DB.getAll('assets')).reverse();
+        const entradas = (await DB.getEntradas()).reverse().filter((e) => e.ativo);
+
+        assetRecords = [
+          ...entradas.map((e) => ({
+            ...e,
+            sn: e.dataChegada || e.dataHora || '',
+            tipo: e.py || e.empresa || '',
+            _source: 'entrada',
+          })),
+          ...assets.map((a) => ({
+            ...a,
+            _source: 'asset',
+          })),
+        ];
+
+        renderAssetTable();
+      }
+
+      function renderAssetTable() {
         const tbody = document.getElementById('listaAssets');
         tbody.innerHTML = '';
 
-        assets.slice(0, 16).forEach((a) => {
+        const filtered = assetFilter
+          ? assetRecords.filter((item) =>
+              String(item.nome || '').toLowerCase().includes(assetFilter),
+            )
+          : assetRecords;
+
+        if (!filtered.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="5" class="text-center text-muted">Nenhum registro encontrado.</td></tr>';
+          return;
+        }
+
+        filtered.slice(0, 16).forEach((item) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${a.codigo || '-'}</td>
-            <td>${a.nome || '-'}</td>
-            <td>${a.sn || '-'}</td>
-            <td>${a.tipo || '-'}</td>
+            <td>${item.codigo || '-'}</td>
+            <td>${item.nome || '-'}</td>
+            <td>${item.sn || '-'}</td>
+            <td>${item.tipo || '-'}</td>
             <td class="text-end">
-              <button class="btn btn-sm btn-danger" onclick="deletarAsset('${a.id}')">
+              <button class="btn btn-sm btn-danger" onclick="deletarRegistro('${item._source}', '${item.id}')">
                 <i class="fas fa-trash"></i>
               </button>
             </td>
@@ -268,10 +313,16 @@
         });
       }
 
-      async function deletarAsset(id) {
+      async function deletarRegistro(source, id) {
         if (!id) return;
-        if (!confirm('Deseja excluir este asset?')) return;
-        await DB.deleteItem(`assets`, id);
+        if (!confirm('Deseja excluir este registro?')) return;
+
+        if (source === 'entrada') {
+          await DB.deleteEntrada(id);
+        } else {
+          await DB.deleteItem('assets', id);
+        }
+
         carregarAssets();
       }
 
@@ -318,6 +369,11 @@
 
         doc.save(`asset_${payload.codigo || 'sem_codigo'}_${now.toISOString().slice(0, 10)}.pdf`);
       }
+
+      // Expor funções chamadas por atributos onclick
+      window.carregarAssets = carregarAssets;
+      window.salvarAsset = salvarAsset;
+      window.deletarRegistro = deletarRegistro;
 
       window.addEventListener('load', () => {
         access.initAccess({
