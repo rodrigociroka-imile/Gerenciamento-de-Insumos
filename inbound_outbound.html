@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SCI – Inbound / Outbound</title>
+    <link rel="shortcut icon" href="./img/CDC-ESTOQUE.png">
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -13,6 +14,7 @@
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
       body {
@@ -167,7 +169,7 @@
                       <input id="nomeProduto" class="form-control" required />
                     </div>
                     <div class="form-check mb-3">
-                      <input class="form-check-input" type="radio" name="statusProduto" id="ativo" value="ativo" checked>
+                      <input class="form-check-input" type="checkbox" id="ativo" />
                       <label class="form-check-label" for="ativo">
                         Ativo
                       </label>
@@ -198,6 +200,17 @@
                     </div>
 
                     <div class="mb-3">
+                      <label class="form-label">Importar planilha</label>
+                      <input type="file" id="bulkFileInput" accept=".xlsx,.xls,.csv" class="form-control" />
+                      <small class="text-muted">O arquivo deve conter colunas como: codigo, nome, empresa, quantidade, dataChegada, po, ri, py, ativo.</small>
+                    </div>
+                    <div class="mb-3">
+                      <button type="button" id="bulkSaveBtn" class="btn btn-secondary w-100" disabled>
+                        <i class="fas fa-file-upload me-1"></i> Salvar entradas em massa
+                      </button>
+                    </div>
+
+                    <div class="mb-3">
                       <label class="form-label">Foto</label>
                       <input type="file" id="fileInput" accept="image/*" class="form-control" />
                       <img id="preview" class="preview-img mt-3 border" src="https://via.placeholder.com/280x280?text=Sem+Imagem" alt="Preview" />
@@ -222,11 +235,14 @@
                   <strong>Últimas Entradas</strong>
                 </div>
                 <div class="card-body p-0">
+                  <div class="p-3">
+                    <input id="searchEntrada" class="form-control" placeholder="Buscar por produto..." />
+                  </div>
                   <div class="table-fixed">
                     <table class="table table-hover mb-0">
                       <thead class="table-light">
                         <tr>
-                          <th>Produto</th>
+                          <th>Nome do Produto</th>
                           <th>Qt</th>
                           <th>Data</th>
                           <th>Ações</th>
@@ -257,7 +273,7 @@
                     </div>
                     <div class="mb-3">
                       <label class="form-label">Nome do Produto</label>
-                      <input id="nomeProduto" class="form-control" required />
+                      <input id="nomeProdutoSaida" class="form-control" required />
                     </div>
                     <div class="mb-3">
                       <label class="form-label">Quantidade</label>
@@ -290,6 +306,9 @@
                   <strong>Últimas Saídas</strong>
                 </div>
                 <div class="card-body p-0">
+                  <div class="p-3">
+                    <input id="searchSaida" class="form-control" placeholder="Buscar por produto..." />
+                  </div>
                   <div class="table-fixed">
                     <table class="table table-hover mb-0">
                       <thead class="table-light">
@@ -330,6 +349,75 @@
       </div>
     </div>
 
+    <!-- ENTRADA DETALHES MODAL -->
+    <div class="modal fade" id="entradaModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Detalhes da Entrada</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="mb-2">
+                  <label class="form-label">Código</label>
+                  <input id="entradaModalCodigo" class="form-control" disabled />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Nome do Produto</label>
+                  <input id="entradaModalNome" class="form-control" disabled />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Ativo</label>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="entradaModalAtivo" disabled />
+                    <label class="form-check-label" for="entradaModalAtivo">Ativo</label>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Empresa</label>
+                  <input id="entradaModalEmpresa" class="form-control" disabled />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Quantidade</label>
+                  <input id="entradaModalQt" class="form-control" disabled />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Data Chegada</label>
+                  <input id="entradaModalDataChegada" class="form-control" disabled />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-2">
+                  <label class="form-label">PO</label>
+                  <input id="entradaModalPo" class="form-control" disabled />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">RI</label>
+                  <input id="entradaModalRi" class="form-control" disabled />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">PY</label>
+                  <input id="entradaModalPy" class="form-control" disabled />
+                </div>
+                <div class="mb-2">
+                  <label class="form-label">Data Registro</label>
+                  <input id="entradaModalDataHora" class="form-control" disabled />
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 text-center">
+              <img id="entradaModalImage" class="preview-img border" src="https://via.placeholder.com/280x280?text=Sem+Imagem" alt="Imagem" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="acesso.js"></script>
     <script type="module">
@@ -337,6 +425,10 @@
 
       let currentImage = '';
       let currentStream = null;
+      let entradasCache = [];
+      let entradaFilter = '';
+      let saidaFilter = '';
+      let bulkEntries = [];
 
       access.initAccess({
         mainScreenId: 'mainContent',
@@ -347,23 +439,44 @@
         validSenha: 'inbound123',
       });
 
-      async function loadTables() {
-        await carregarEntradas();
-        await carregarSaidas();
+      function normalizeString(value) {
+        return String(value || '').toLowerCase();
       }
 
-      async function carregarEntradas() {
-        const entradas = (await DB.getEntradas()).reverse();
+      function normalizeHeader(value) {
+        return String(value || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '')
+          .replace(/[^a-zA-Z0-9]/g, '')
+          .toLowerCase();
+      }
+
+      function renderEntradas() {
         const tbody = document.getElementById('listaEntradas');
         tbody.innerHTML = '';
-        entradas.slice(0, 12).forEach((e) => {
+
+        const activeEntries = entradasCache.filter((e) => e.ativo);
+        const filtered = entradaFilter
+          ? activeEntries.filter((e) => normalizeString(e.nome).includes(entradaFilter))
+          : activeEntries;
+
+        if (!filtered.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="4" class="text-center text-muted">Nenhuma entrada encontrada.</td></tr>';
+          return;
+        }
+
+        filtered.slice(0, 12).forEach((e) => {
           const tr = document.createElement('tr');
+          tr.setAttribute('style', 'cursor:pointer');
+          tr.setAttribute('onclick', `openEntradaModal('${e.id}')`);
           tr.innerHTML = `
             <td>${e.nome || '-'}</td>
             <td>${e.quantidade || 0}</td>
             <td>${e.dataHora || '-'}</td>
             <td class="text-end">
-              <button class="btn btn-sm btn-danger" onclick="deletarEntrada('${e.id}')">
+              <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deletarEntrada('${e.id}')">
                 <i class="fas fa-trash"></i>
               </button>
             </td>
@@ -372,16 +485,31 @@
         });
       }
 
+      async function carregarEntradas() {
+        entradasCache = (await DB.getEntradas()).reverse();
+        renderEntradas();
+      }
+
       async function carregarSaidas() {
         const saidas = (await DB.getSaidas()).reverse();
         const tbody = document.getElementById('listaSaidas');
         tbody.innerHTML = '';
-        saidas.slice(0, 12).forEach((s) => {
+
+        const filtered = saidaFilter
+          ? saidas.filter((s) =>
+              String(s.nome || s.codigo || '')
+                .toLowerCase()
+                .includes(saidaFilter),
+            )
+          : saidas;
+
+        filtered.slice(0, 12).forEach((s) => {
+          const local = [s.region, s.station].filter(Boolean).join(' / ') || '-';
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${s.codigo || '-'}</td>
+            <td>${s.nome || s.codigo || '-'}</td>
             <td>${s.quantidade || 0}</td>
-            <td>${s.local || '-'}</td>
+            <td>${local}</td>
             <td class="text-end">
               <button class="btn btn-sm btn-danger" onclick="deletarSaida('${s.id}')">
                 <i class="fas fa-trash"></i>
@@ -390,6 +518,72 @@
           `;
           tbody.appendChild(tr);
         });
+      }
+
+      async function loadTables() {
+        await Promise.all([carregarEntradas(), carregarSaidas()]);
+      }
+
+      async function parseBulkFile(file) {
+        try {
+          const data = await file.arrayBuffer();
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+          if (!json.length) return [];
+
+          const headers = json[0].map((h) => normalizeHeader(String(h)));
+          return json.slice(1).map((row) => {
+            const obj = {};
+            headers.forEach((key, idx) => {
+              obj[key] = row[idx];
+            });
+            return obj;
+          });
+        } catch (err) {
+          console.warn('Falha ao ler arquivo:', err);
+          return [];
+        }
+      }
+
+      async function salvarEntradasEmMassa() {
+        if (!bulkEntries.length) {
+          alert('Nenhuma planilha carregada para importação.');
+          return;
+        }
+
+        if (!confirm(`Importar ${bulkEntries.length} entradas?`)) return;
+
+        for (const row of bulkEntries) {
+          const entrada = {
+            id: Date.now().toString(36).toUpperCase(),
+            codigo: String(row.codigo || row.code || '').trim(),
+            nome: String(row.nome || row.product || '').trim(),
+            empresa: String(row.empresa || row.company || '').trim(),
+            quantidade: Number(row.quantidade || row.qt || 0),
+            dataHora: new Date().toLocaleString('pt-BR'),
+            dataChegada: String(row.dataChegada || row.date || row.data || '').trim(),
+            po: String(row.po || '').trim(),
+            ri: String(row.ri || '').trim(),
+            py: String(row.py || '').trim(),
+            imagem: '',
+            ativo:
+              row.ativo !== undefined && row.ativo !== ''
+                ? String(row.ativo).toLowerCase() === 'true'
+                : true,
+            qrData: '',
+          };
+
+          entrada.qrData = `ENTRADA|ID:${entrada.id}|COD:${entrada.codigo}|PROD:${entrada.nome}|EMP:${entrada.empresa}|QT:${entrada.quantidade}|CHEGADA:${entrada.dataChegada}|PO:${entrada.po || '--'}|RI:${entrada.ri || '--'}|PY:${entrada.py || '--'}|REG:${entrada.dataHora}`;
+
+          await DB.addEntrada(entrada);
+        }
+
+        alert('Importação concluída.');
+        bulkEntries = [];
+        document.getElementById('bulkFileInput').value = '';
+        document.getElementById('bulkSaveBtn').disabled = true;
+        await loadTables();
       }
 
       async function deletarEntrada(id) {
@@ -408,13 +602,55 @@
 
       document.getElementById('btnRefresh').addEventListener('click', loadTables);
 
+      document.getElementById('searchEntrada').addEventListener('input', (e) => {
+        entradaFilter = String(e.target.value || '').trim().toLowerCase();
+        renderEntradas();
+      });
+
+      document.getElementById('searchSaida').addEventListener('input', (e) => {
+        saidaFilter = String(e.target.value || '').trim().toLowerCase();
+        carregarSaidas();
+      });
+
+      document.getElementById('nomeProduto').addEventListener('input', (e) => {
+        const value = String(e.target.value || '').trim();
+        entradaFilter = value.toLowerCase();
+        renderEntradas();
+      });
+
+      document.getElementById('bulkFileInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+          bulkEntries = [];
+          document.getElementById('bulkSaveBtn').disabled = true;
+          return;
+        }
+        bulkEntries = await parseBulkFile(file);
+        document.getElementById('bulkSaveBtn').disabled = !bulkEntries.length;
+        if (bulkEntries.length) {
+          alert(`${bulkEntries.length} entradas prontas para importação.`);
+        }
+      });
+
+      document.getElementById('bulkSaveBtn').addEventListener('click', salvarEntradasEmMassa);
+
       document.getElementById('fileInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
+
+        // Mostrar preview imediatamente, usando objectURL como fallback
+        const preview = document.getElementById('preview');
+        const objectUrl = URL.createObjectURL(file);
+        preview.src = objectUrl;
+
         const reader = new FileReader();
         reader.onload = (ev) => {
           currentImage = ev.target.result;
-          document.getElementById('preview').src = currentImage;
+          preview.src = currentImage;
+          URL.revokeObjectURL(objectUrl);
+        };
+        reader.onerror = () => {
+          currentImage = objectUrl;
         };
         reader.readAsDataURL(file);
       });
@@ -453,12 +689,32 @@
         bootstrap.Modal.getInstance(document.getElementById('cameraModal')).hide();
       }
 
+      function openEntradaModal(id) {
+        const entrada = entradasCache.find((e) => e.id === id);
+        if (!entrada) return;
+
+        document.getElementById('entradaModalCodigo').value = entrada.codigo || '';
+        document.getElementById('entradaModalNome').value = entrada.nome || '';
+        document.getElementById('entradaModalAtivo').checked = !!entrada.ativo;
+        document.getElementById('entradaModalEmpresa').value = entrada.empresa || '';
+        document.getElementById('entradaModalQt').value = entrada.quantidade || '';
+        document.getElementById('entradaModalDataChegada').value = entrada.dataChegada || '';
+        document.getElementById('entradaModalPo').value = entrada.po || '';
+        document.getElementById('entradaModalRi').value = entrada.ri || '';
+        document.getElementById('entradaModalPy').value = entrada.py || '';
+        document.getElementById('entradaModalDataHora').value = entrada.dataHora || '';
+        document.getElementById('entradaModalImage').src = entrada.imagem || 'https://via.placeholder.com/280x280?text=Sem+Imagem';
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('entradaModal')).show();
+      }
+
       document.getElementById('formEntrada').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const ativoInput = document.getElementById('ativo');
         const entrada = {
           id: Date.now().toString(36).toUpperCase(),
           codigo: document.getElementById('codigo').value.trim(),
-          nome: document.getElementById('nome').value.trim(),
+          nome: document.getElementById('nomeProduto').value.trim(),
           empresa: document.getElementById('empresa').value.trim(),
           quantidade: Number(document.getElementById('qt').value),
           dataHora: new Date().toLocaleString('pt-BR'),
@@ -467,16 +723,26 @@
           ri: document.getElementById('ri').value.trim(),
           py: document.getElementById('py').value.trim(),
           imagem: currentImage,
+          ativo: ativoInput.checked,
           qrData: '',
         };
 
         entrada.qrData = `ENTRADA|ID:${entrada.id}|COD:${entrada.codigo}|PROD:${entrada.nome}|EMP:${entrada.empresa}|QT:${entrada.quantidade}|CHEGADA:${entrada.dataChegada}|PO:${entrada.po || '--'}|RI:${entrada.ri || '--'}|PY:${entrada.py || '--'}|REG:${entrada.dataHora}`;
 
-        await DB.addEntrada(entrada);
+        const entradaKey = await DB.addEntrada(entrada);
+        if (!entradaKey) {
+          alert('Não foi possível salvar a entrada. Veja o console para mais detalhes.');
+          return;
+        }
+
         alert('Entrada registrada com sucesso.');
         e.target.reset();
         document.getElementById('preview').src = 'https://via.placeholder.com/280x280?text=Sem+Imagem';
         currentImage = '';
+
+        // Deixa o checkbox desmarcado após salvar, para evitar que o próximo registro seja salvo como ativo por engano.
+        ativoInput.checked = false;
+
         await loadTables();
       });
 
@@ -486,6 +752,7 @@
         const saida = {
           id: Date.now().toString(36).toUpperCase(),
           codigo: document.getElementById('saida-codigo').value.trim(),
+          nome: document.getElementById('nomeProdutoSaida').value.trim(),
           quantidade: Number(document.getElementById('saida-qt').value),
           region: document.getElementById('region').value.trim(),
           station: document.getElementById('station').value.trim(),
@@ -498,11 +765,25 @@
           return;
         }
 
-        await DB.addSaida(saida);
+        const saidaKey = await DB.addSaida(saida);
+        if (!saidaKey) {
+          alert('Não foi possível salvar a saída. Veja o console para mais detalhes.');
+          return;
+        }
+
         alert('Saída registrada com sucesso.');
         e.target.reset();
         await loadTables();
       });
+
+      // Expor funções chamadas por atributos onclick
+      window.openCamera = openCamera;
+      window.capturarFoto = capturarFoto;
+      window.closeCameraModal = closeCameraModal;
+      window.openEntradaModal = openEntradaModal;
+      window.deletarEntrada = deletarEntrada;
+      window.deletarSaida = deletarSaida;
+      window.salvarEntradasEmMassa = salvarEntradasEmMassa;
 
       window.addEventListener('load', async () => {
         await loadTables();
