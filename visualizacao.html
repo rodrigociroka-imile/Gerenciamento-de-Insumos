@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SCI – Visualização</title>
-
+    <link rel="shortcut icon" href="./img/CDC-ESTOQUE.png">
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -168,6 +168,9 @@
         <div class="tab-pane fade show active" id="entradas" role="tabpanel">
           <div class="card">
             <div class="card-body p-0">
+              <div class="p-3">
+                <input id="searchEntradas" class="form-control" placeholder="Buscar entrada..." />
+              </div>
               <div class="table-fixed">
                 <table class="table table-hover mb-0">
                   <thead class="table-light">
@@ -195,6 +198,9 @@
         <div class="tab-pane fade" id="saidas" role="tabpanel">
           <div class="card">
             <div class="card-body p-0">
+              <div class="p-3">
+                <input id="searchSaidas" class="form-control" placeholder="Buscar saída..." />
+              </div>
               <div class="table-fixed">
                 <table class="table table-hover mb-0">
                   <thead class="table-light">
@@ -253,11 +259,18 @@
       });
 
       async function renderizarTabelas() {
+        const filterEntradas = String(document.getElementById('searchEntradas')?.value || '').trim().toLowerCase();
+        const filterSaidas = String(document.getElementById('searchSaidas')?.value || '').trim().toLowerCase();
+
         const entradas = (await DB.getEntradas()).reverse();
         const tbodyE = document.getElementById('tabelaEntradas');
         tbodyE.innerHTML = '';
 
-        entradas.forEach((ent) => {
+        const entradasFiltradas = filterEntradas
+          ? entradas.filter((ent) => String(ent.nome || '').toLowerCase().includes(filterEntradas))
+          : entradas;
+
+        entradasFiltradas.forEach((ent) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${ent.id}</strong></td>
@@ -270,7 +283,7 @@
             <td>${ent.py || '-'}</td>
             <td>${ent.nota || '-'}</td>
             <td>
-              <button class="btn btn-sm btn-primary" onclick="mostrarQR('${ent.qrData}', '${ent.nome}')">
+              <button class="btn btn-sm btn-primary" onclick="mostrarQR('${ent.qrData || ''}', '${ent.nome || ''}')">
                 <i class="fas fa-qrcode"></i>
               </button>
             </td>
@@ -289,7 +302,12 @@
         const saidas = (await DB.getSaidas()).reverse();
         const tbodyS = document.getElementById('tabelaSaidas');
         tbodyS.innerHTML = '';
-        saidas.forEach((s) => {
+
+        const saidasFiltradas = filterSaidas
+          ? saidas.filter((s) => String(s.nome || '').toLowerCase().includes(filterSaidas))
+          : saidas;
+
+        saidasFiltradas.forEach((s) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><strong>${s.id}</strong></td>
@@ -382,6 +400,17 @@
           nomeProduto || 'Produto sem nome';
         new bootstrap.Modal(document.getElementById('qrModal')).show();
       }
+
+      document.getElementById('searchEntradas').addEventListener('input', renderizarTabelas);
+      document.getElementById('searchSaidas').addEventListener('input', renderizarTabelas);
+
+      // Expor funções para os botões inline
+      window.renderizarTabelas = renderizarTabelas;
+      window.mostrarQR = mostrarQR;
+      window.editarEntrada = editarEntrada;
+      window.deletarEntrada = deletarEntrada;
+      window.editarSaida = editarSaida;
+      window.deletarSaida = deletarSaida;
 
       async function gerarPDF(tipo) {
         const { jsPDF } = window.jspdf;
